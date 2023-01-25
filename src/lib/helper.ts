@@ -273,3 +273,15 @@ export const getSetupStatements = (setupProps: ConvertedExpression[]) => {
     })
     .flat()
 }
+
+export function throwErrorOnDestructuring(string: string) {
+  const regex = /^(?!\s*\/\/).*{.*}\s*=\s*this/gm
+  const bodyIncludesThis = string.match(regex)
+  if (bodyIncludesThis) {
+    throw new Error(
+      `destructuring 'this' in ${name}, ` +
+        bodyIncludesThis +
+        `could be a conflict. `
+    )
+  }
+}

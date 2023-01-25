@@ -90,16 +90,18 @@ export default {
       } else return this.hidePrevBtn
     },
     showBackButton() {
+      // const { someVal } = this
       if (this.hidePrev) return this.prevPanel
       return (
         this.getAppConfig.enable_back_button &&
         !this.localHidePrevBtn &&
         !this.prevPanel?.toLowerCase().startsWith('auth')
       )
-    },
+    }
   },
   mounted() {
     this.error = null
+    // const { someValue } = this
   },
   mixins: ["something"],
   methods: {
@@ -116,6 +118,8 @@ export default {
     //  this function should error and wont be able to be converted
     // },
     async nextClickMethod() {
+      const aVar = this.anotherVar
+      // const { someValue, somethingElse } = this
       const innerArrow = () => 'someValue'
       this.doMoreTHINGS()
       this.$refs.something.lotsOfThings = true
@@ -140,6 +144,7 @@ export default {
   },
   watch: {
     getAppConfig(dupItem, oldVal) {
+//      const { someValue } = this
       this.$emit('watch-emitter')
       this.$emit('second-watch')
       // const b = this._dupItem

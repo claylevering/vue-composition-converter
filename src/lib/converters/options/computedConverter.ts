@@ -5,6 +5,7 @@ import {
   getInitializerProps,
   nonNull,
   storePath,
+  throwErrorOnDestructuring,
 } from '../../helper'
 
 const snakeCaseToCamelCase = (str: string) =>
@@ -80,6 +81,8 @@ export const computedConverter = (
         const block = body?.getText(sourceFile) || '{}'
         const name = propName.getText(sourceFile)
 
+        throwErrorOnDestructuring(block)
+
         if (block.includes('this.$emit'))
           throw new Error('Emit not allowed in computed properties.')
 
@@ -94,6 +97,8 @@ export const computedConverter = (
 
         const name = prop.name.getText(sourceFile)
         const block = prop.initializer.getText(sourceFile) || '{}'
+
+        throwErrorOnDestructuring(block)
 
         if (block.includes('this.$emit'))
           throw new Error('Emit not allowed in computed properties.')

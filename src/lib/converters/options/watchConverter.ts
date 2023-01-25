@@ -4,6 +4,7 @@ import {
   getInitializerProps,
   hasWord,
   nonNull,
+  throwErrorOnDestructuring,
 } from '../../helper'
 
 export const watchConverter = (
@@ -31,6 +32,7 @@ export const watchConverter = (
           }
         })
 
+        throwErrorOnDestructuring(block)
         return {
           use: 'watch',
           expression: `watch(${name}, (${parameters}) => ${block})`,
@@ -69,6 +71,7 @@ export const watchConverter = (
           .join(',')
         const block = handler.body?.getText(sourceFile) || '{}'
 
+        throwErrorOnDestructuring(block)
         return {
           use: 'watch',
           expression: `watch(${name}, (${parameters}) => ${block}, ${JSON.stringify(

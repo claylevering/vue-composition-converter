@@ -6,6 +6,7 @@ import {
   hasWord,
   lifecycleNameMap,
   snakeCaseToCamelCase,
+  throwErrorOnDestructuring,
 } from '../../helper'
 
 export const getMethodExpression = (
@@ -41,6 +42,8 @@ export const getMethodExpression = (
         )
       }
     })
+
+    throwErrorOnDestructuring(body)
 
     if (lifecycleNameMap.has(name)) {
       const newLifecycleName = lifecycleNameMap.get(name)
