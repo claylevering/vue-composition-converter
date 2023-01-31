@@ -80,6 +80,11 @@ export function findDescendantArrowFunction(node: ts.Node): boolean {
   }
 }
 
+export const isVariableAssignment = (str: string) => {
+  const regex = /^\s+(?:const|let)\s+(\w+)\s*=\s*this.\1(\s|$)/
+  return regex.test(str)
+}
+
 export const contextProps = [
   'attrs',
   'slots',

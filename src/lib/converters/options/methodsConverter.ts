@@ -4,6 +4,7 @@ import {
   findDescendantArrowFunction,
   getInitializerProps,
   hasWord,
+  isVariableAssignment,
   lifecycleNameMap,
   snakeCaseToCamelCase,
   throwErrorOnDestructuring,
@@ -39,6 +40,14 @@ export const getMethodExpression = (
           `Scope issue in ${name} , ` +
             parameter +
             `parameter conflicts with this.${parameter}. `
+        )
+      }
+    })
+
+    body.split('\n').forEach((line) => {
+      if (isVariableAssignment(line)) {
+        throw new Error(
+          `property ${name} is assigned to itself. This is not allowed.`
         )
       }
     })

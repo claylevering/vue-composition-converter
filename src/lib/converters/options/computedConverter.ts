@@ -3,6 +3,7 @@ import {
   ConvertedExpression,
   findDescendantArrowFunction,
   getInitializerProps,
+  isVariableAssignment,
   nonNull,
   storePath,
   throwErrorOnDestructuring,
@@ -80,8 +81,15 @@ export const computedConverter = (
         const typeName = type ? `:${type.getText(sourceFile)}` : ''
         const block = body?.getText(sourceFile) || '{}'
         const name = propName.getText(sourceFile)
-
         throwErrorOnDestructuring(block)
+
+        block.split('\n').forEach((line) => {
+          if (isVariableAssignment(line)) {
+            throw new Error(
+              `Computed property ${name} is assigned to itself. This is not allowed.`
+            )
+          }
+        })
 
         if (block.includes('this.$emit'))
           throw new Error('Emit not allowed in computed properties.')
@@ -99,6 +107,14 @@ export const computedConverter = (
         const block = prop.initializer.getText(sourceFile) || '{}'
 
         throwErrorOnDestructuring(block)
+
+        block.split('\n').forEach((line) => {
+          if (isVariableAssignment(line)) {
+            throw new Error(
+              `Computed property ${name} is assigned to itself. This is not allowed.`
+            )
+          }
+        })
 
         if (block.includes('this.$emit'))
           throw new Error('Emit not allowed in computed properties.')

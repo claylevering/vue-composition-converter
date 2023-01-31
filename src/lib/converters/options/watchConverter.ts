@@ -3,6 +3,7 @@ import {
   ConvertedExpression,
   getInitializerProps,
   hasWord,
+  isVariableAssignment,
   nonNull,
   throwErrorOnDestructuring,
 } from '../../helper'
@@ -28,6 +29,14 @@ export const watchConverter = (
               `Scope issue in ${name} , ` +
                 parameter +
                 ` parameter conflicts with this.${parameter}. `
+            )
+          }
+        })
+
+        block.split('\n').forEach((line) => {
+          if (isVariableAssignment(line)) {
+            throw new Error(
+              `Computed property ${name} is assigned to itself. This is not allowed.`
             )
           }
         })
@@ -72,6 +81,14 @@ export const watchConverter = (
         const block = handler.body?.getText(sourceFile) || '{}'
 
         throwErrorOnDestructuring(block)
+
+        block.split('\n').forEach((line) => {
+          if (isVariableAssignment(line)) {
+            throw new Error(
+              `Computed property ${name} is assigned to itself. This is not allowed.`
+            )
+          }
+        })
         return {
           use: 'watch',
           expression: `watch(${name}, (${parameters}) => ${block}, ${JSON.stringify(
