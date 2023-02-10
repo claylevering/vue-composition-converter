@@ -1,33 +1,20 @@
 <template>
-  <div class="p-0 mt-4">
-    <div class="panel-switch-buttons mt-4">
+  <div>
+    <div class="mt-4">
       <span>
         <v-btn
-          data-testid="btn-panel-switch-next"
           block
-          class="mb-3 sm:mb-0"
-          depressed
-          color="primary"
-          :disabled="nextBtnDisabled"
-          :loading="nextBtnLoading || nextLoading"
-          tabindex="1"
-          large
-          @click="nextClickMethod"
+          :disabled="btnDisabled"
+          :loading="btnLoading || nextLoading"
+          @click="nextClicked"
         >
-          {{ localNextStepBtnTitle }}
-          <v-icon v-if="!hideNextChevron" right>chevron_right</v-icon>
+          {{ nextBtnTitle }}
         </v-btn>
       </span>
       <span v-if="showBackButton">
-        <v-btn
-          depressed
-          block
-          large
-          class="md:mr-4 mt-3"
-          color="gray"
-          tabindex="2"
-          :disabled="nextBtnLoading || nextLoading"
-          @click="prevClickMethod"
+        <v-btn         
+          :disabled="btnLoading || nextLoading"
+          @click="prevClicked"
         >
           <v-icon left>chevron_left</v-icon>
           {{ previousBtnTitle }}
@@ -42,18 +29,19 @@
 </template>
 
 <script>
-import { useGlobalStore, mapState } from '@/stores'
+import { useSessionState } from '@/stores'
+import { mapState } from 'pinia'
 
 export default {
-  name: 'PanelSwitchButtons',
+  name: 'ButtonGroup',
 
   props: {
     nextBtnText: {
       type: String,
       default: '',
     },
-    nextBtnLoading: Boolean,
-    nextBtnDisabled: Boolean,
+    btnLoading: Boolean,
+    btnDisabled: Boolean,
     hidePrev: Boolean,
     hideNextChevron: Boolean,
   },
@@ -69,20 +57,19 @@ export default {
   },
 
   computed: {
-    ...mapState(useGlobalStore, [
+    ...mapState(useSessionState, [
       'prevPanel',
       'previousBtnTitle',
       'getAppConfig',
       'hidePrevBtn',
-      'nextStepBtnTitle',
       'apConfigBtnText',
     ]),
     // arrowComputed: () => {
     //   return this.prop
     // },
     // ^ this computed property should error. 
-    localNextStepBtnTitle() {
-      return this.apConfigBtnText || this.nextBtnText || this.nextStepBtnTitle
+    nextBtnTitle() {
+      return this.apConfigBtnText || this.nextBtnText
     },
     //someValue() {
     //  const prevPanel = this.prevPanel
@@ -110,7 +97,7 @@ export default {
   },
   mixins: ["something"],
   methods: {
-        ...mapActions(useGlobalStore, [
+        ...mapActions(useSessionState, [
       'doMoreTHINGS',
     ]),
 
@@ -127,7 +114,7 @@ export default {
     //  console.log(dupItem)
     //  this function should error and wont be able to be converted
     // },
-    async nextClickMethod() {
+    async nextClicked() {
       const aVar = this.anotherVar
       // const { someValue, somethingElse } = this
       const innerArrow = () => 'someValue'
@@ -144,9 +131,9 @@ export default {
         insertionType: this.insertionType,
       })
     },
-    async prevClickMethod(someValue) {
+    async prevClicked(someValue) {
       this.$nextTick(() => {
-        nextClickMethod()
+        nextClicked()
       })
       this.error = null
       this.$emit('previous')
@@ -154,10 +141,10 @@ export default {
   },
   watch: {
     getAppConfig(dupItem, oldVal) {
-    //  const prevPanel = this.prevPanel 
-//      const { someValue } = this
-      this.$emit('watch-emitter')
-      this.$emit('second-watch')
+      // const prevPanel = this.prevPanel 
+      // const { someValue } = this
+        this.$emit('watch-emitter')
+        this.$emit('second-watch')
       // const b = this._dupItem
       // this._dupItem = oldVal
     }
