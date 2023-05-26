@@ -21,6 +21,9 @@ export const convertSrc = (input: string): string => {
   )
   if (exportAssignNode) {
     // optionsAPI
+    /**
+     * TODO ここのファイルをいじる
+     */
     return convertOptionsApi(sourceFile)
   }
 

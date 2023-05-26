@@ -10,6 +10,13 @@ import { lifecycleConverter } from './lifecycleConverter'
 import { methodsConverter } from './methodsConverter'
 import { watchConverter } from './watchConverter'
 import { propReader } from './propsReader'
+import { fetchConverter } from './fetchConverter'
+import { oldHeadConverter } from './oldHeadConverter'
+import { asyncDataConverter } from './asyncDataConverter'
+import { apolloConverter } from './apolloConverter'
+import { componentsConverter } from './componentsConverter'
+import { nuxt2fetchKeyConverter } from './nuxt2fetchKeyConverter'
+import { optionSetupConverter } from './optionSetupConverter'
 
 export const convertOptions = (sourceFile: ts.SourceFile) => {
   const exportAssignNode = getNodeByKind(
@@ -55,11 +62,60 @@ const _convertOptions = (
   const methodsProps: ConvertedExpression[] = []
   const watchProps: ConvertedExpression[] = []
   const lifecycleProps: ConvertedExpression[] = []
+  const componentsProps: ConvertedExpression[] = []
+  const oldHeadProps: ConvertedExpression[] = []
+  const fetchProps: ConvertedExpression[] = []
+  const asyncDataProps: ConvertedExpression[] = []
+  const apolloProps: ConvertedExpression[] = []
+  const optionSetupProps: ConvertedExpression[] = []
+  const nuxt2FetchKeyProps: ConvertedExpression[] = []
+
   const propNames: string[] = []
 
   exportObject.properties.forEach((prop) => {
     const name = prop.name?.getText(sourceFile) || ''
     switch (true) {
+      case name === 'oldHead':
+        /**
+         * TODO oldHeadの変換
+         * 1. コンポーネントの最下部に配置する
+         * 2. 内容はcomputedと同じ
+         * 3. 最後にuseHead()を呼び出す
+         */
+        oldHeadProps.push(...oldHeadConverter(prop, sourceFile))
+        break
+      case name === 'nuxt2FetchKey':
+        nuxt2FetchKeyProps.push(...nuxt2fetchKeyConverter(prop, sourceFile))
+        break
+      case name === 'setup':
+        optionSetupProps.push(...optionSetupConverter(prop, sourceFile))
+        break
+      case name === 'fetch':
+        /**
+         * TODO fetchの変換
+         * 中身を useAsyncData()に変換する
+         */
+        fetchProps.push(...fetchConverter(prop, sourceFile))
+        break
+      case name === 'asyncData':
+        /**
+         * TODO asyncDataの変換
+         */
+        asyncDataProps.push(...asyncDataConverter(prop, sourceFile))
+        break
+      case name === 'apollo':
+        /**
+         * TODO apolloの変換
+         */
+        apolloProps.push(...apolloConverter(prop, sourceFile))
+        break
+      case name === 'components':
+        /**
+         * TODO componentsの変換
+         * defineAsyncComponentのみ変換する必要がある
+         */
+        componentsProps.push(...componentsConverter(prop, sourceFile))
+        break
       case name === 'data':
         dataProps.push(...dataConverter(prop, sourceFile))
         break
@@ -122,8 +178,10 @@ const _convertOptions = (
   const setupProps: ConvertedExpression[] = [
     ...propsRefProps,
     ...dataProps,
+    ...optionSetupProps,
     ...computedProps,
     ...methodsProps,
+    ...oldHeadProps,
     ...watchProps,
     ...lifecycleProps,
   ]
