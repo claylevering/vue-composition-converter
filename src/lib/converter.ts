@@ -22,9 +22,10 @@ export const convertSrc = (input: string): string => {
   if (exportAssignNode) {
     // optionsAPI
     /**
-     * TODO ここのファイルをいじる
+     * @see https://github.com/microsoft/TypeScript/issues/36174
      */
-    return convertOptionsApi(sourceFile)
+    const text = unescape(convertOptionsApi(sourceFile).replace(/\\u/g, '%u'))
+    return text
   }
 
   const classNode = getNodeByKind(sourceFile, ts.SyntaxKind.ClassDeclaration)

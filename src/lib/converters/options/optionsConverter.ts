@@ -76,12 +76,6 @@ const _convertOptions = (
     const name = prop.name?.getText(sourceFile) || ''
     switch (true) {
       case name === 'oldHead':
-        /**
-         * TODO oldHeadの変換
-         * 1. コンポーネントの最下部に配置する
-         * 2. 内容はcomputedと同じ
-         * 3. 最後にuseHead()を呼び出す
-         */
         oldHeadProps.push(...oldHeadConverter(prop, sourceFile))
         break
       case name === 'nuxt2FetchKey':
