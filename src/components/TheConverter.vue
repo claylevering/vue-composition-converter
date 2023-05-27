@@ -6,15 +6,11 @@ import hljs from 'highlight.js/lib/core'
 import typescript from 'highlight.js/lib/languages/typescript'
 import 'highlight.js/styles/atom-one-dark.css'
 import { convertSrc } from '../lib/converter'
-import classApi from '../assets/template/classAPI.txt?raw'
 import optionsApi from '../assets/template/optionsAPI.txt?raw'
 
 hljs.registerLanguage('typescript', typescript)
 
-const templateMap = new Map([
-  ['optionsAPI', optionsApi],
-  ['classAPI', classApi],
-])
+const templateMap = new Map([['optionsAPI', optionsApi]])
 
 const input = ref('')
 const output = ref('')
@@ -71,13 +67,13 @@ watch(
       ></textarea>
     </div>
     <div class="flex-1 flex flex-col">
-      <h2>Output: (Vue2 / Composition API w/pinia)</h2>
+      <h2>Output: (Vue3 / Composition API w/Nuxt)</h2>
       <pre
         class="hljs border w-full text-xs leading-3 flex-1 p-2 whitespace-pre-wrap select-all"
         v-html="output"
       />
     </div>
-    <div
+    <!-- <div
       class="absolute right-2 top-2 w-16 h-16 bg-white rounded-full p-2 hover:bg-yellow-400"
     >
       <a
@@ -87,7 +83,7 @@ watch(
       >
         <img src="../assets/GitHub-Mark-64px.png" />
       </a>
-    </div>
+    </div> -->
   </div>
 </template>
 

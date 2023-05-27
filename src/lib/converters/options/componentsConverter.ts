@@ -6,6 +6,7 @@ export const componentsConverter = (
   node: ts.Node,
   sourceFile: ts.SourceFile
 ): ConvertedExpression[] => {
+  console.log(node)
   return []
   return getInitializerProps(node)
     .map((prop) => {

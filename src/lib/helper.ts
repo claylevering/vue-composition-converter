@@ -118,8 +118,10 @@ export const replaceThisContext = (
       if (p1 === 'refs') return 'NEW_REF'
       if (p1 === 'emit') return 'emit'
       if (p1 === 'nextTick') return 'nextTick'
-      if (contextProps.includes(p1)) return `ctx.${p1}`
-      return `ctx.root.$${p1}`
+      // if (contextProps.includes(p1)) return `ctx.${p1}`
+      if (p1 === 'apollo') return `nuxtApp.$apolloProvider.defaultClient`
+      if (p1 === 'route') return `useRoute()`
+      return `nuxtApp.$${p1}`
     })
     .replace(/this\.([\w-]+)/g, (_, p1) => {
       if (propNameMap.has(p1)) return `props.${p1}`

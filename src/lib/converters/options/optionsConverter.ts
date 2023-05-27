@@ -32,22 +32,6 @@ export const convertOptions = (sourceFile: ts.SourceFile) => {
       return _convertOptions(objectNode, sourceFile)
     }
   }
-  const classNode = getNodeByKind(sourceFile, ts.SyntaxKind.ClassDeclaration)
-  if (classNode) {
-    const decoratorNode = getNodeByKind(classNode, ts.SyntaxKind.Decorator)
-
-    if (decoratorNode) {
-      const objectNode = getNodeByKind(
-        decoratorNode,
-        ts.SyntaxKind.ObjectLiteralExpression
-      )
-
-      if (objectNode && ts.isObjectLiteralExpression(objectNode)) {
-        return _convertOptions(objectNode, sourceFile)
-      }
-    }
-  }
-
   return null
 }
 
@@ -169,8 +153,17 @@ const _convertOptions = (
           },
         ]
 
+  const useNuxtAppProps: ConvertedExpression = {
+    // use propsの位置で使う
+    use: 'props',
+    expression: `const nuxtApp = useNuxtApp()`,
+    returnNames: ['nuxtApp'],
+    pkg: 'ignore',
+  }
+
   const setupProps: ConvertedExpression[] = [
     ...propsRefProps,
+    useNuxtAppProps,
     ...dataProps,
     ...optionSetupProps,
     ...computedProps,
