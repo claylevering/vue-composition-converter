@@ -1,19 +1,14 @@
 # vue-composition-converter
 
-Convert optionsAPI into composition API (script setup w/pinia)
-
-Thanks to https://github.com/miyaoka for the original src code
+https://github.com/fazulk/vue-composition-converter をnuxt3用にフォークした`composition-api`へのコンバータ
 
 #### if you are getting a error (red border) it means your code could have some variable assignments that can't be converted. Such as below:
+
 ```
 const varName = 'foo'
 this.varName = varName
 ```
-In this case you need to fix your code before attempting to convert. 
-
-## demo
-
-https://converter.myspace.page
+In this case you need to fix your code before attempting to convert.
 
 ## convert options into `script setup`
 

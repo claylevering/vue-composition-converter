@@ -3,18 +3,9 @@ import {
   ConvertedExpression,
   findDescendantArrowFunction,
   getInitializerProps,
-  isVariableAssignment,
   nonNull,
-  storePath,
   throwErrorOnDestructuring,
 } from '../../helper'
-
-const snakeCaseToCamelCase = (str: string) =>
-  str
-    .toLowerCase()
-    .replace(/([-_][a-z])/g, (group) =>
-      group.toUpperCase().replace('-', '').replace('_', '')
-    )
 
 export const computedConverter = (
   node: ts.Node,
@@ -24,72 +15,24 @@ export const computedConverter = (
     .map((prop) => {
       if (findDescendantArrowFunction(prop))
         throw new Error('Arrow Functions not allowed as computed properties.')
-      if (ts.isSpreadAssignment(prop)) {
-        // mapGetters, mapState
-        if (!ts.isCallExpression(prop.expression)) return
-        const { arguments: args, expression } = prop.expression
-
-        if (!ts.isIdentifier(expression)) return
-        const mapName = expression.text
-        const [namespace, mapArray] = args
-
-        const namespaceText = namespace.text as any
-        const names = mapArray.elements as any
-
-        switch (mapName) {
-          case 'mapWritableState':
-          case 'mapState': {
-            const spread = names.map((el) => el.text)
-
-            const storeName = snakeCaseToCamelCase(
-              namespaceText
-                .replace(/([A-Z])/g, '_$1')
-                .toUpperCase()
-                .replace('USE_', '')
-            )
-
-            return [
-              {
-                use: 'store',
-                expression: `const ${storeName} = ${namespaceText}()`,
-                returnNames: [storeName],
-                pkg: 'ignore',
-              },
-              {
-                use: 'storeToRefs',
-                expression: `const { ${spread.join(
-                  ', '
-                )} } = storeToRefs(${storeName})`,
-                returnNames: spread,
-                pkg: 'pinia',
-              },
-            ]
-          }
-          case 'mapGetters':
-            return names.map(({ text: name }) => {
-              return {
-                use: 'computed',
-                expression: `const ${name} = computed(() => ${storePath}.getters['${namespaceText}/${name}'])`,
-                returnNames: [name],
-              }
-            })
-        }
-        return null
-      } else if (ts.isMethodDeclaration(prop)) {
-        // computed method
+      if (ts.isMethodDeclaration(prop)) {
         const { name: propName, body, type } = prop
         const typeName = type ? `:${type.getText(sourceFile)}` : ''
-        const block = body?.getText(sourceFile) || '{}'
+        const block = body?.getFullText(sourceFile) || '{}'
         const name = propName.getText(sourceFile)
         throwErrorOnDestructuring(block)
 
-        block.split('\n').forEach((line) => {
-          if (isVariableAssignment(line)) {
-            throw new Error(
-              `Computed property ${name} is assigned to itself. This is not allowed.`
-            )
-          }
-        })
+        /**
+         * const listPage = listPage.value; みたいなところでエラーになるため
+         * ビルド時のエラーで代用
+         */
+        // block.split('\n').forEach((line) => {
+        //   if (isVariableAssignment(line)) {
+        //     throw new Error(
+        //       `Computed property ${name} is assigned to itself. This is not allowed.`
+        //     )
+        //   }
+        // })
 
         if (block.includes('this.$emit'))
           throw new Error('Emit not allowed in computed properties.')
@@ -97,31 +40,6 @@ export const computedConverter = (
         return {
           use: 'computed',
           expression: `const ${name} = computed(()${typeName} => ${block})`,
-          returnNames: [name],
-        }
-      } else if (ts.isPropertyAssignment(prop)) {
-        // computed getter/setter
-        if (!ts.isObjectLiteralExpression(prop.initializer)) return
-
-        const name = prop.name.getText(sourceFile)
-        const block = prop.initializer.getText(sourceFile) || '{}'
-
-        throwErrorOnDestructuring(block)
-
-        block.split('\n').forEach((line) => {
-          if (isVariableAssignment(line)) {
-            throw new Error(
-              `Computed property ${name} is assigned to itself. This is not allowed.`
-            )
-          }
-        })
-
-        if (block.includes('this.$emit'))
-          throw new Error('Emit not allowed in computed properties.')
-
-        return {
-          use: 'computed',
-          expression: `const ${name} = computed(${block})`,
           returnNames: [name],
         }
       }

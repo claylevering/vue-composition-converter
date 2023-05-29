@@ -76,8 +76,10 @@ export const watchConverter = (
 
         const name = prop.name.getText(sourceFile)
         const parameters = handler.parameters
-          .map((param) => param.getText(sourceFile))
+          // .map((param) => param.getText(sourceFile))
+          .map((param) => param.name.getText(sourceFile))
           .join(',')
+        console.log(handler.parameters)
         const block = handler.body?.getText(sourceFile) || '{}'
 
         throwErrorOnDestructuring(block)

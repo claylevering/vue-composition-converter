@@ -1,7 +1,6 @@
 import ts from 'typescript'
 import { parseComponent } from 'vue-template-compiler'
 import { getNodeByKind } from './helper'
-import { convertClass } from './converters/classApiConverter'
 import { convertOptionsApi } from './converters/optionsApiConverter'
 
 export const convertSrc = (input: string): string => {
@@ -21,13 +20,11 @@ export const convertSrc = (input: string): string => {
   )
   if (exportAssignNode) {
     // optionsAPI
-    return convertOptionsApi(sourceFile)
-  }
-
-  const classNode = getNodeByKind(sourceFile, ts.SyntaxKind.ClassDeclaration)
-  if (classNode && ts.isClassDeclaration(classNode)) {
-    // classAPI
-    return convertClass(classNode, sourceFile)
+    /**
+     * @see https://github.com/microsoft/TypeScript/issues/36174
+     */
+    const text = unescape(convertOptionsApi(sourceFile).replace(/\\u/g, '%u'))
+    return text
   }
 
   throw new Error('no convert target')

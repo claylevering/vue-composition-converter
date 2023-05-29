@@ -2,7 +2,7 @@
   "name": "vue-composition-converter",
   "version": "0.0.1",
   "scripts": {
-    "dev": "vite --open",
+    "dev": "vite --open --port 3001",
     "build": "vite build",
     "preview": "vite preview --port 5050",
     "test:unit": "vitest --environment jsdom",

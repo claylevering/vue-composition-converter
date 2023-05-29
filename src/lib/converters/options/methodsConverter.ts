@@ -6,7 +6,6 @@ import {
   hasWord,
   isVariableAssignment,
   lifecycleNameMap,
-  snakeCaseToCamelCase,
   throwErrorOnDestructuring,
 } from '../../helper'
 
@@ -25,7 +24,7 @@ export const getMethodExpression = (
 
     const name = node.name.getText(sourceFile)
     const type = node.type ? `:${node.type.getText(sourceFile)}` : ''
-    const body = node.body?.getText(sourceFile) || '{}'
+    const body = node.body?.getFullText(sourceFile) || '{}'
     const parameters = node.parameters
       .map((param) => param.getText(sourceFile))
       .join(',')
@@ -70,43 +69,6 @@ export const getMethodExpression = (
         expression: `${async} function ${name} (${parameters})${type} ${body}`,
       },
     ]
-  } else if (ts.isSpreadAssignment(node)) {
-    // mapActions
-    if (!ts.isCallExpression(node.expression)) return []
-    const { arguments: args, expression } = node.expression
-    if (!ts.isIdentifier(expression)) return []
-    const mapName = expression.text
-    const [namespace, mapArray] = args
-    // if (!ts.isStringLiteral(namespace)) return [];
-    // if (!ts.isArrayLiteralExpression(mapArray)) return [];
-
-    const namespaceText = namespace.text
-    const names = mapArray.elements as ts.NodeArray<ts.StringLiteral>
-
-    if (mapName === 'mapActions') {
-      const spread = names.map((el) => el.text).join(', ')
-
-      const storeName = snakeCaseToCamelCase(
-        namespaceText
-          .replace(/([A-Z])/g, '_$1')
-          .toUpperCase()
-          .replace('USE_', '')
-      )
-      return [
-        {
-          use: 'store',
-          expression: `const ${storeName} = ${namespaceText}()`,
-          returnNames: [storeName],
-          pkg: 'ignore',
-        },
-        {
-          use: 'storeToRefs',
-          expression: `const { ${spread} } = ${storeName}`,
-          returnNames: [''],
-          pkg: 'pinia',
-        },
-      ]
-    }
   }
   return []
 }
