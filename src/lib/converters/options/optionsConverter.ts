@@ -88,10 +88,6 @@ const _convertOptions = (
         apolloProps.push(...apolloConverter(prop, sourceFile))
         break
       case name === 'components':
-        /**
-         * TODO componentsの変換
-         * defineAsyncComponentのみ変換する必要がある
-         */
         componentsProps.push(...componentsConverter(prop, sourceFile))
         break
       case name === 'data':
@@ -163,6 +159,7 @@ const _convertOptions = (
 
   const setupProps: ConvertedExpression[] = [
     ...propsRefProps,
+    ...componentsProps,
     useNuxtAppProps,
     ...dataProps,
     ...optionSetupProps,
