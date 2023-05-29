@@ -131,24 +131,26 @@ export const replaceThisContext = (
 }
 
 export const getImportStatement = (setupProps: ConvertedExpression[]) => {
-  const usedFunctions = [
-    ...new Set(
-      setupProps
-        .filter((el) => {
-          if (!el.pkg) return true
-        })
-        .map(({ use }) => use)
-        .filter(nonNull)
-    ),
-  ]
+  // AutoImportしてるので不要
+  // const usedFunctions = [
+  //   ...new Set(
+  //     setupProps
+  //       .filter((el) => {
+  //         if (!el.pkg) return true
+  //       })
+  //       .map(({ use }) => use)
+  //       .filter(nonNull)
+  //   ),
+  // ]
 
-  const results = [
-    ...ts.createSourceFile(
-      '',
-      `import { ${usedFunctions.join(',')} } from 'vue'`,
-      ts.ScriptTarget.Latest
-    ).statements,
-  ]
+  // const results = [
+  //   ...ts.createSourceFile(
+  //     '',
+  //     `import { ${usedFunctions.join(',')} } from 'vue'`,
+  //     ts.ScriptTarget.Latest
+  //   ).statements,
+  // ]
+  const results = []
 
   const extraImports = [
     ...new Set(
@@ -270,13 +272,15 @@ export const getSetupStatements = (setupProps: ConvertedExpression[]) => {
       return pv
     }, [])
     .map(({ expression, isBreak }) => {
-      if (isBreak) return ts.factory.createIdentifier('\n')
-      else
+      if (isBreak) {
+        return ts.factory.createIdentifier('\n')
+      } else {
         return ts.createSourceFile(
           '',
           replaceThisContext(expression, refNameMap, propNameMap),
           ts.ScriptTarget.Latest
         ).statements
+      }
     })
     .flat()
 }

@@ -21,6 +21,8 @@ export const convertOptionsApi = (sourceFile: ts.SourceFile) => {
     sourceFile.flags
   )
 
-  const printer = ts.createPrinter()
+  const printer = ts.createPrinter({
+    removeComments: false,
+  })
   return printer.printFile(newSrc)
 }

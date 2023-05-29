@@ -7,7 +7,7 @@ interface TypeInfo {
   type: string | undefined
 }
 
-const types: Record<string, TypeInfo> = {}
+let types: Record<string, TypeInfo> = {}
 
 function getData(node: ts.Node) {
   if (ts.isInterfaceDeclaration(node) && node?.name?.text === 'Data') {
@@ -19,8 +19,24 @@ function getData(node: ts.Node) {
         let type: string | undefined
         if (property.type) {
           if (ts.isArrayTypeNode(property.type)) {
+            console.log(property.type.elementType)
             // @ts-expect-error
-            type = property.type.elementType.typeName.text + '[]'
+            if (
+              property.type.elementType?.type &&
+              ts.isUnionTypeNode(property.type.elementType.type)
+            ) {
+              type =
+                '(' +
+                // @ts-expect-error
+                property.type.elementType.type.types
+                  // @ts-expect-error
+                  .map((t) => t.typeName.text)
+                  .join(' | ') +
+                ')[]'
+            } else {
+              // @ts-expect-error
+              type = property.type.elementType.typeName.text + '[]'
+            }
           } else if (ts.isTupleTypeNode(property.type)) {
             type =
               '[' +
@@ -50,6 +66,7 @@ export const dataConverter = (
   sourceFile: ts.SourceFile
 ): ConvertedExpression[] => {
   const objNode = getNodeByKind(node, ts.SyntaxKind.ObjectLiteralExpression)
+  types = {}
   getData(sourceFile)
   // console.log(types)
 
@@ -58,9 +75,9 @@ export const dataConverter = (
     .map((prop) => {
       if (!ts.isPropertyAssignment(prop)) return
       const name = prop.name.getText(sourceFile)
-      const text = prop.initializer.getText(sourceFile)
+      const text = prop.initializer.getFullText(sourceFile)
       let refType = ''
-      if (types[name].type) {
+      if (types[name] && types[name].type) {
         refType = types[name].optional
           ? `<${types[name].type} | undefined>`
           : `<${types[name].type}>`

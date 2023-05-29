@@ -3,7 +3,6 @@ import {
   ConvertedExpression,
   findDescendantArrowFunction,
   getInitializerProps,
-  isVariableAssignment,
   nonNull,
   throwErrorOnDestructuring,
 } from '../../helper'
@@ -17,10 +16,9 @@ export const computedConverter = (
       if (findDescendantArrowFunction(prop))
         throw new Error('Arrow Functions not allowed as computed properties.')
       if (ts.isMethodDeclaration(prop)) {
-        // computed method
         const { name: propName, body, type } = prop
         const typeName = type ? `:${type.getText(sourceFile)}` : ''
-        const block = body?.getText(sourceFile) || '{}'
+        const block = body?.getFullText(sourceFile) || '{}'
         const name = propName.getText(sourceFile)
         throwErrorOnDestructuring(block)
 
