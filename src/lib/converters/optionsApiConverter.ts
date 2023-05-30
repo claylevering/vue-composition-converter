@@ -24,5 +24,6 @@ export const convertOptionsApi = (sourceFile: ts.SourceFile) => {
   const printer = ts.createPrinter({
     removeComments: false,
   })
+  // print full text
   return printer.printFile(newSrc)
 }

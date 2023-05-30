@@ -175,15 +175,20 @@ export const getImportStatement = (setupProps: ConvertedExpression[]) => {
 export const getExportStatement = (
   setupProps: ConvertedExpression[],
   propNames: string[],
-  otherProps: ts.ObjectLiteralElementLike[]
+  otherProps: ConvertedExpression[]
 ) => {
   const body = ts.factory.createBlock(getSetupStatements(setupProps))
 
-  if (otherProps.length)
+  if (otherProps.length) {
     body.statements.push(
-      ts.factory.createIdentifier('\n//TODO! extra root methods:\n')
+      ts.factory.createIdentifier(
+        '\n//TODO: 対応していないプロパティです。手動で書き換えてください。:\n'
+      )
     )
-  body.statements = body.statements.concat(otherProps)
+    otherProps.forEach((prop) => {
+      body.statements.push(ts.factory.createIdentifier(prop.expression))
+    })
+  }
 
   return body.statements
 }

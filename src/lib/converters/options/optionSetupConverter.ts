@@ -29,7 +29,6 @@ export const getBodyExpression = (
     const end = body.lastIndexOf('}')
     body.slice(start + 1, end).trim()
     body = removeReturnStatement(node, sourceFile)
-    console.log(body)
     body.split('\n').forEach((line) => {
       if (isVariableAssignment(line)) {
         throw new Error(`property is assigned to itself. This is not allowed.`)
