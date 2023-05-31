@@ -1,6 +1,7 @@
 import ts from 'typescript'
 import {
   ConvertedExpression,
+  commentOutProperties,
   getNodeByKind,
   lifecycleNameMap,
 } from '../../helper'
@@ -10,12 +11,9 @@ import { lifecycleConverter } from './lifecycleConverter'
 import { methodsConverter } from './methodsConverter'
 import { watchConverter } from './watchConverter'
 import { propReader } from './propsReader'
-import { fetchConverter } from './fetchConverter'
 import { oldHeadConverter } from './oldHeadConverter'
-import { asyncDataConverter } from './asyncDataConverter'
-import { apolloConverter } from './apolloConverter'
 import { componentsConverter } from './componentsConverter'
-import { nuxt2fetchKeyConverter } from './nuxt2fetchKeyConverter'
+import { otherConverter } from './otherConverter'
 import { optionSetupConverter } from './optionSetupConverter'
 
 export const convertOptions = (sourceFile: ts.SourceFile) => {
@@ -40,7 +38,7 @@ const _convertOptions = (
   sourceFile: ts.SourceFile
 ) => {
   const trueProps: ts.ObjectLiteralElementLike[] = []
-  const otherProps: ts.ObjectLiteralElementLike[] = []
+  const otherProps: ConvertedExpression[] = []
   const dataProps: ConvertedExpression[] = []
   const computedProps: ConvertedExpression[] = []
   const methodsProps: ConvertedExpression[] = []
@@ -48,11 +46,7 @@ const _convertOptions = (
   const lifecycleProps: ConvertedExpression[] = []
   const componentsProps: ConvertedExpression[] = []
   const oldHeadProps: ConvertedExpression[] = []
-  const fetchProps: ConvertedExpression[] = []
-  const asyncDataProps: ConvertedExpression[] = []
-  const apolloProps: ConvertedExpression[] = []
   const optionSetupProps: ConvertedExpression[] = []
-  const nuxt2FetchKeyProps: ConvertedExpression[] = []
 
   const propNames: string[] = []
 
@@ -62,36 +56,10 @@ const _convertOptions = (
       case name === 'oldHead':
         oldHeadProps.push(...oldHeadConverter(prop, sourceFile))
         break
-      case name === 'nuxt2FetchKey':
-        nuxt2FetchKeyProps.push(...nuxt2fetchKeyConverter(prop, sourceFile))
-        break
       case name === 'setup':
         optionSetupProps.push(...optionSetupConverter(prop, sourceFile))
         break
-      case name === 'fetch':
-        /**
-         * TODO fetchの変換
-         * 中身を useAsyncData()に変換する
-         */
-        fetchProps.push(...fetchConverter(prop, sourceFile))
-        break
-      case name === 'asyncData':
-        /**
-         * TODO asyncDataの変換
-         */
-        asyncDataProps.push(...asyncDataConverter(prop, sourceFile))
-        break
-      case name === 'apollo':
-        /**
-         * TODO apolloの変換
-         */
-        apolloProps.push(...apolloConverter(prop, sourceFile))
-        break
       case name === 'components':
-        /**
-         * TODO componentsの変換
-         * defineAsyncComponentのみ変換する必要がある
-         */
         componentsProps.push(...componentsConverter(prop, sourceFile))
         break
       case name === 'data':
@@ -119,8 +87,8 @@ const _convertOptions = (
         break
 
       default:
-        // 該当しないものはそのままにする
-        otherProps.push(prop)
+        // 該当しないものはコメントアウト
+        otherProps.push(...otherConverter(prop, sourceFile))
         break
     }
   })
@@ -163,6 +131,7 @@ const _convertOptions = (
 
   const setupProps: ConvertedExpression[] = [
     ...propsRefProps,
+    ...componentsProps,
     useNuxtAppProps,
     ...dataProps,
     ...optionSetupProps,
@@ -171,6 +140,7 @@ const _convertOptions = (
     ...oldHeadProps,
     ...watchProps,
     ...lifecycleProps,
+    // ...otherProps,
   ]
 
   return {

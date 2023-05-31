@@ -1,16 +1,33 @@
 import ts from 'typescript'
-import { ConvertedExpression, getInitializerProps } from '../../helper'
-import { getMethodExpression } from './methodsConverter'
+import { ConvertedExpression, getInitializerProps, nonNull } from '../../helper'
 
 export const componentsConverter = (
   node: ts.Node,
   sourceFile: ts.SourceFile
 ): ConvertedExpression[] => {
-  console.log(node)
-  return []
+  // defineAsyncComponentのみを抽出する
   return getInitializerProps(node)
     .map((prop) => {
-      return getMethodExpression(prop, sourceFile)
+      if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
+        const name = prop.name.text
+        const initializer = prop.initializer
+
+        if (ts.isCallExpression(initializer)) {
+          const expression = initializer.expression
+          const expressionText = expression.getText(sourceFile)
+
+          if (expressionText === 'defineAsyncComponent') {
+            const initializerText = initializer.getText(sourceFile)
+            return {
+              // use: 'defineAsyncComponent',
+              use: 'props',
+              expression: `const ${name} = ${initializerText}`,
+              returnNames: [name],
+            }
+          }
+        }
+      }
     })
     .flat()
+    .filter(nonNull)
 }
