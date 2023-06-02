@@ -1,9 +1,9 @@
 import ts from 'typescript'
 import {
   ConvertedExpression,
-  commentOutProperties,
   getNodeByKind,
   lifecycleNameMap,
+  objToString,
 } from '../../helper'
 import { computedConverter } from './computedConverter'
 import { dataConverter } from './dataConverter'
@@ -37,7 +37,6 @@ const _convertOptions = (
   exportObject: ts.ObjectLiteralExpression,
   sourceFile: ts.SourceFile,
 ) => {
-  const trueProps: ts.ObjectLiteralElementLike[] = []
   const otherProps: ConvertedExpression[] = []
   const dataProps: ConvertedExpression[] = []
   const computedProps: ConvertedExpression[] = []
@@ -49,6 +48,8 @@ const _convertOptions = (
   const optionSetupProps: ConvertedExpression[] = []
 
   const propNames: string[] = []
+  const propDefaults: Record<string, string | undefined> = {}
+  const propTypes: Record<string, string> = {}
 
   exportObject.properties.forEach((prop) => {
     const name = prop.name?.getText(sourceFile) || ''
@@ -79,10 +80,55 @@ const _convertOptions = (
         break
 
       case name === 'props':
-        trueProps.push(prop)
+        const propsProperty = prop as ts.PropertyAssignment
+        const props = propsProperty.initializer as ts.ObjectLiteralExpression
+
+        props.properties.forEach((prop) => {
+          if (ts.isPropertyAssignment(prop)) {
+            const propObject = prop.initializer as ts.ObjectLiteralExpression
+            console.log(propObject)
+            const typeProperty = propObject.properties.find(
+              (p) =>
+                ts.isPropertyAssignment(p) &&
+                p.name.getText(sourceFile) === 'type',
+            ) as ts.PropertyAssignment
+            const defaultProperty = propObject.properties.find(
+              (p) =>
+                ts.isPropertyAssignment(p) &&
+                p.name.getText(sourceFile) === 'default',
+            ) as ts.PropertyAssignment
+            const requiredProperty = propObject.properties.find(
+              (p) =>
+                ts.isPropertyAssignment(p) &&
+                p.name.getText(sourceFile) === 'required',
+            ) as ts.PropertyAssignment
+
+            const propRequired =
+              requiredProperty?.initializer.getText(sourceFile) || 'false'
+            const propName =
+              propRequired === 'true'
+                ? `${prop.name.getText(sourceFile)}`
+                : `${prop.name.getText(sourceFile)}?`
+            const propDefault = defaultProperty?.initializer.getText(sourceFile)
+            console.log(propRequired)
+            if (ts.isAsExpression(typeProperty.initializer)) {
+              const typeArg = typeProperty.initializer.type
+              // Remove "PropType<" and ">" from the type string
+              const propType = typeArg
+                .getText(sourceFile)
+                .replace('PropType<', '')
+                .slice(0, -1)
+
+              propTypes[propName] = propType
+              propDefaults[propName] = propDefault || undefined
+            } else {
+              const propType = typeProperty.initializer.getText(sourceFile)
+              propTypes[propName] = propType
+            }
+          }
+        })
         propNames.push(...propReader(prop, sourceFile))
         break
-
       case name === 'name':
         break
 
@@ -93,32 +139,31 @@ const _convertOptions = (
     }
   })
 
-  // there has to be a better way to do this
-  const printer = ts.createPrinter()
-  let p: string[] | string = printer
-    .printFile(
-      ts.factory.createSourceFile(
-        [ts.factory.createObjectLiteralExpression(trueProps)],
-        undefined,
-        undefined,
-      ),
-    )
-    .replace('{ props:', '')
-    .split(' ')
-  p.pop()
-
-  p = p.length ? p.join(' ') : ''
-
   const propsRefProps: ConvertedExpression[] =
     propNames.length === 0
       ? []
       : [
           {
             use: 'props',
-            expression: `const props = defineProps(${p})`,
+            expression: `interface Props ${objToString(propTypes)}`,
             returnNames: propNames,
             pkg: 'ignore',
           },
+          Object.keys(propDefaults).length === 0
+            ? {
+                use: 'props',
+                expression: `const props = defineProps<Props>()`,
+                returnNames: ['props'],
+                pkg: 'ignore',
+              }
+            : {
+                use: 'props',
+                expression: `const props = withDefaults(defineProps<Props>(), ${objToString(
+                  propDefaults,
+                )}`,
+                returnNames: ['props'],
+                pkg: 'ignore',
+              },
         ]
 
   const useNuxtAppProps: ConvertedExpression = {

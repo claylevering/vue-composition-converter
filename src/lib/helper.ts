@@ -301,3 +301,16 @@ export function throwErrorOnDestructuring(string: string) {
     )
   }
 }
+
+export const objToString = (obj: any) => {
+  let str = '{ '
+  if (obj instanceof Object) {
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        str += `${key}: ${obj[key]}, `
+      }
+    }
+    str = str.slice(0, -2) + ' }'
+  }
+  return str
+}
