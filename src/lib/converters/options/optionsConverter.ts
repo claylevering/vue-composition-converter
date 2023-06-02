@@ -86,7 +86,6 @@ const _convertOptions = (
         props.properties.forEach((prop) => {
           if (ts.isPropertyAssignment(prop)) {
             const propObject = prop.initializer as ts.ObjectLiteralExpression
-            console.log(propObject)
             const typeProperty = propObject.properties.find(
               (p) =>
                 ts.isPropertyAssignment(p) &&
@@ -107,10 +106,9 @@ const _convertOptions = (
               requiredProperty?.initializer.getText(sourceFile) || 'false'
             const propName =
               propRequired === 'true'
-                ? `${prop.name.getText(sourceFile)}`
+                ? prop.name.getText(sourceFile)
                 : `${prop.name.getText(sourceFile)}?`
             const propDefault = defaultProperty?.initializer.getText(sourceFile)
-            console.log(propRequired)
             if (ts.isAsExpression(typeProperty.initializer)) {
               const typeArg = typeProperty.initializer.type
               // Remove "PropType<" and ">" from the type string
@@ -119,11 +117,12 @@ const _convertOptions = (
                 .replace('PropType<', '')
                 .slice(0, -1)
 
-              propTypes[propName] = propType
+              propTypes[propName] = convertPropType(propType)
               propDefaults[propName] = propDefault || undefined
             } else {
               const propType = typeProperty.initializer.getText(sourceFile)
-              propTypes[propName] = propType
+              propTypes[propName] = convertPropType(propType)
+              propDefaults[propName] = propDefault || undefined
             }
           }
         })
@@ -191,4 +190,11 @@ const _convertOptions = (
     propNames,
     otherProps,
   }
+}
+
+function convertPropType(type: string) {
+  return type
+    .replace('String', 'string')
+    .replace('Number', 'number')
+    .replace('Boolean', 'boolean')
 }
