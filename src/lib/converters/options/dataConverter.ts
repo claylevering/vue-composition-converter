@@ -1,74 +1,56 @@
 import ts from 'typescript'
 import { ConvertedExpression, getNodeByKind } from '../../helper'
 
-interface TypeInfo {
-  name: string
-  optional: boolean
-  type: string | undefined
-}
+function findInterface(sourceFile: ts.SourceFile, interfaceName: string) {
+  let result: ts.InterfaceDeclaration | undefined
 
-let types: Record<string, TypeInfo> = {}
-
-function getData(node: ts.Node) {
-  if (ts.isInterfaceDeclaration(node) && node?.name?.text === 'Data') {
-    for (const property of node.members) {
-      if (ts.isPropertySignature(property)) {
-        // @ts-expect-error
-        const name = property.name.text
-        const optional = property.questionToken ? true : false
-        let type: string | undefined
-        if (property.type) {
-          if (ts.isArrayTypeNode(property.type)) {
-            console.log(property.type.elementType)
-            // @ts-expect-error
-            if (
-              property.type.elementType?.type &&
-              ts.isUnionTypeNode(property.type.elementType.type)
-            ) {
-              type =
-                '(' +
-                // @ts-expect-error
-                property.type.elementType.type.types
-                  // @ts-expect-error
-                  .map((t) => t.typeName.text)
-                  .join(' | ') +
-                ')[]'
-            } else {
-              // @ts-expect-error
-              type = property.type.elementType.typeName.text + '[]'
-            }
-          } else if (ts.isTupleTypeNode(property.type)) {
-            type =
-              '[' +
-              // @ts-expect-error
-              property.type.elements.map((el) => el.typeName.text).join(', ') +
-              ']'
-          } else if (ts.isTypeReferenceNode(property.type)) {
-            // @ts-expect-error
-            type = property.type.typeName.text
-          } else {
-            // プリミティブ型
-            // TODO foo?: string のような場合、`const foo = ref<any>()` になってしまう
-            type = undefined
-          }
-        } else {
-          type = 'any'
-        }
-        types[name] = { name, optional, type }
-      }
+  function find(node: ts.Node) {
+    if (ts.isInterfaceDeclaration(node) && node.name.text === interfaceName) {
+      result = node
+    } else {
+      ts.forEachChild(node, find)
     }
   }
-  ts.forEachChild(node, getData)
+
+  find(sourceFile)
+  return result
 }
 
+type Types = Record<string, string | undefined>
 export const dataConverter = (
   node: ts.Node,
-  sourceFile: ts.SourceFile
+  sourceFile: ts.SourceFile,
 ): ConvertedExpression[] => {
+  /**
+   * data is defined as an interface.
+   * so we need to find the interface and get the type of each property.
+   *
+   * e.g.
+   * interface Data {
+   *  data1: Type1
+   *  data2: Type2
+   * }
+   *
+   * export default defineComponent({
+   *  data(): Data {}
+   * })
+   */
+  const dataInterface = findInterface(sourceFile, 'Data')
+
+  const types: Types = {}
+  if (dataInterface) {
+    dataInterface.members.forEach((member) => {
+      if (ts.isPropertySignature(member)) {
+        const type = member.type?.getText(sourceFile)
+        const name = member.name.getText(sourceFile)
+        const isOptional = member.questionToken ? true : false
+        const typeWithOptional = isOptional ? `${type} | undefined` : type
+        types[name] = typeWithOptional
+      }
+    })
+  }
+
   const objNode = getNodeByKind(node, ts.SyntaxKind.ObjectLiteralExpression)
-  types = {}
-  getData(sourceFile)
-  // console.log(types)
 
   if (!(objNode && ts.isObjectLiteralExpression(objNode))) return []
   return objNode.properties
@@ -76,12 +58,7 @@ export const dataConverter = (
       if (!ts.isPropertyAssignment(prop)) return
       const name = prop.name.getText(sourceFile)
       const text = prop.initializer.getFullText(sourceFile)
-      let refType = ''
-      if (types[name] && types[name].type) {
-        refType = types[name].optional
-          ? `<${types[name].type} | undefined>`
-          : `<${types[name].type}>`
-      }
+      const refType = types[name] ? `<${types[name]}>` : ''
       return {
         use: 'ref',
         expression: `const ${name} = ref${refType}(${

@@ -3,9 +3,9 @@ import { ConvertedExpression, getInitializerProps, nonNull } from '../../helper'
 
 export const componentsConverter = (
   node: ts.Node,
-  sourceFile: ts.SourceFile
+  sourceFile: ts.SourceFile,
 ): ConvertedExpression[] => {
-  // defineAsyncComponentのみを抽出する
+  // extract only defineAsyncComponent
   return getInitializerProps(node)
     .map((prop) => {
       if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {

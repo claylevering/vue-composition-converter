@@ -19,12 +19,12 @@ import { optionSetupConverter } from './optionSetupConverter'
 export const convertOptions = (sourceFile: ts.SourceFile) => {
   const exportAssignNode = getNodeByKind(
     sourceFile,
-    ts.SyntaxKind.ExportAssignment
+    ts.SyntaxKind.ExportAssignment,
   )
   if (exportAssignNode) {
     const objectNode = getNodeByKind(
       exportAssignNode,
-      ts.SyntaxKind.ObjectLiteralExpression
+      ts.SyntaxKind.ObjectLiteralExpression,
     )
     if (objectNode && ts.isObjectLiteralExpression(objectNode)) {
       return _convertOptions(objectNode, sourceFile)
@@ -35,7 +35,7 @@ export const convertOptions = (sourceFile: ts.SourceFile) => {
 
 const _convertOptions = (
   exportObject: ts.ObjectLiteralExpression,
-  sourceFile: ts.SourceFile
+  sourceFile: ts.SourceFile,
 ) => {
   const trueProps: ts.ObjectLiteralElementLike[] = []
   const otherProps: ConvertedExpression[] = []
@@ -87,7 +87,7 @@ const _convertOptions = (
         break
 
       default:
-        // 該当しないものはコメントアウト
+        // comment out other properties
         otherProps.push(...otherConverter(prop, sourceFile))
         break
     }
@@ -100,8 +100,8 @@ const _convertOptions = (
       ts.factory.createSourceFile(
         [ts.factory.createObjectLiteralExpression(trueProps)],
         undefined,
-        undefined
-      )
+        undefined,
+      ),
     )
     .replace('{ props:', '')
     .split(' ')
@@ -122,7 +122,6 @@ const _convertOptions = (
         ]
 
   const useNuxtAppProps: ConvertedExpression = {
-    // use propsの位置で使う
     use: 'props',
     expression: `const nuxtApp = useNuxtApp()`,
     returnNames: ['nuxtApp'],
@@ -140,7 +139,6 @@ const _convertOptions = (
     ...oldHeadProps,
     ...watchProps,
     ...lifecycleProps,
-    // ...otherProps,
   ]
 
   return {
