@@ -1,153 +1,33 @@
 <template>
-  <div>
-    <div class="mt-4">
-      <span>
-        <v-btn
-          block
-          :disabled="btnDisabled"
-          :loading="btnLoading || nextLoading"
-          @click="nextClicked"
-        >
-          {{ nextBtnTitle }}
-        </v-btn>
-      </span>
-      <span v-if="showBackButton">
-        <v-btn         
-          :disabled="btnLoading || nextLoading"
-          @click="prevClicked"
-        >
-          <v-icon left>chevron_left</v-icon>
-          {{ previousBtnTitle }}
-        </v-btn>
-      </span>
-    </div>
-
-    <v-alert v-if="error" class="my-3" text color="error">
-      <span v-html="error" />
-    </v-alert>
-  </div>
+  <h1>hello converter</h1>
 </template>
 
-<script>
-import { useSessionState } from '@/stores'
-import { mapState } from 'pinia'
-
-export default {
-  name: 'ButtonGroup',
-
-  props: {
-    nextBtnText: {
-      type: String,
-      default: '',
-    },
-    btnLoading: Boolean,
-    btnDisabled: Boolean,
-    hidePrev: Boolean,
-    hideNextChevron: Boolean,
-  },
-
-  data() {
-    return {
-      dupItem: true,
-      nextLoading: false,
-      error: null,
-      selectedConfig: false,
-      insertionType: true
-    }
-  },
-
-  computed: {
-    ...mapState(useSessionState, [
-      'prevPanel',
-      'previousBtnTitle',
-      'getAppConfig',
-      'hidePrevBtn',
-      'apConfigBtnText',
-    ]),
-    // arrowComputed: () => {
-    //   return this.prop
-    // },
-    // ^ this computed property should error. 
-    nextBtnTitle() {
-      return this.apConfigBtnText || this.nextBtnText
-    },
-    //someValue() {
-    //  const prevPanel = this.prevPanel
-    //  return prevPanel
-    // },
-    localHidePrevBtn() {
-      if (this.hidePrev === true) {
-        return true
-      } else return this.hidePrevBtn
-    },
-    showBackButton() {
-      // const { someVal } = this
-      if (this.hidePrev) return this.prevPanel
-      return (
-        this.getAppConfig.enable_back_button &&
-        !this.localHidePrevBtn &&
-        !this.prevPanel?.toLowerCase().startsWith('auth')
-      )
-    }
-  },
-  mounted() {
-    // const prevPanel = this.prevPanel
-    this.error = null
-    // const { someValue } = this
-  },
-  mixins: ["something"],
-  methods: {
-        ...mapActions(useSessionState, [
-      'doMoreTHINGS',
-    ]),
-
-    // badMethod() {
-    //  const prevPanel = this.prevPanel
-    //   return prevPanel
-    // },
-    //arrowTest: () => { 
-    //  console.log()
-    //},
-    // ^ this arrow function will throw a error and needs to be converted first. 
-    // scopeTest(dupItem) {
-    //  const ok = this.dupItem
-    //  console.log(dupItem)
-    //  this function should error and wont be able to be converted
-    // },
-    async nextClicked() {
-      const aVar = this.anotherVar
-      // const { someValue, somethingElse } = this
-      const innerArrow = () => 'someValue'
-      this.doMoreTHINGS()
-      this.$refs.something.lotsOfThings = true
-      this.error = null
-      this.nextLoading = true
-      this.$refs.anotherRef.values = true
-      this.$emit('another-object', this.error)
-      this.$emit('a-event', { ok: true })
-      this.$emit('next')
-      this.$emit('set-config', {
-        config: this.selectedConfig,
-        insertionType: this.insertionType,
-      })
-    },
-    async prevClicked(someValue) {
-      this.$nextTick(() => {
-        nextClicked()
-      })
-      this.error = null
-      this.$emit('previous')
-    },
-  },
-  watch: {
-    getAppConfig(dupItem, oldVal) {
-      // const prevPanel = this.prevPanel 
-      // const { someValue } = this
-        this.$emit('watch-emitter')
-        this.$emit('second-watch')
-      // const b = this._dupItem
-      // this._dupItem = oldVal
-    }
-  }
+<script lang="ts">
+interface Data {
+  bar: boolean
 }
+export default defineComponent({
+  name: 'AllViewLink',
+  props: {
+    title: {
+      type: String,
+      default: 'foo',
+    },
+  },
+  data(): Data {
+    return {
+      bar: false,
+    }
+  },
+  methods: {
+    foo() {
+      this.bar = true
+    },
+  },
+  computed: {
+    baz() {
+      return this.bar
+    },
+  },
+})
 </script>
