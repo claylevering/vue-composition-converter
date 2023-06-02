@@ -1,6 +1,6 @@
 # vue-composition-converter
 
-https://github.com/fazulk/vue-composition-converter をnuxt3用にフォークした`composition-api`へのコンバータ
+https://github.com/fazulk/vue-composition-converter for Nuxt3 project
 
 #### if you are getting a error (red border) it means your code could have some variable assignments that can't be converted. Such as below:
 
@@ -8,6 +8,7 @@ https://github.com/fazulk/vue-composition-converter をnuxt3用にフォーク�
 const varName = 'foo'
 this.varName = varName
 ```
+
 In this case you need to fix your code before attempting to convert.
 
 ## convert options into `script setup`

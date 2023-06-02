@@ -12,7 +12,6 @@ export const otherConverter = (
   sourceFile: ts.SourceFile
 ): ConvertedExpression[] => {
   const commentOut = commentOutNode(node, sourceFile)
-  console.log(commentOut)
   return [
     {
       expression: commentOut,

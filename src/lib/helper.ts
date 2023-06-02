@@ -22,7 +22,7 @@ export const snakeCaseToCamelCase = (str: string) =>
   str
     .toLowerCase()
     .replace(/([-_][a-z])/g, (group) =>
-      group.toUpperCase().replace('-', '').replace('_', '')
+      group.toUpperCase().replace('-', '').replace('_', ''),
     )
 
 export const lifecycleNameMap: Map<string, string | undefined> = new Map([
@@ -44,7 +44,7 @@ export const nonNull = <T>(item: T): item is NonNullable<T> => item != null
 
 export const getNodeByKind = (
   node: ts.Node,
-  kind: ts.SyntaxKind
+  kind: ts.SyntaxKind,
 ): ts.Node | undefined => {
   const find = (node: ts.Node): ts.Node | undefined => {
     return ts.forEachChild(node, (child) => {
@@ -63,7 +63,7 @@ export function hasWord(word: string, str: string) {
 }
 
 export const getInitializerProps = (
-  node: ts.Node
+  node: ts.Node,
 ): ts.ObjectLiteralElementLike[] => {
   if (!ts.isPropertyAssignment(node)) return []
   if (!ts.isObjectLiteralExpression(node.initializer)) return []
@@ -111,7 +111,7 @@ export function getStringFromExpression(str: string): string[] {
 export const replaceThisContext = (
   str: string,
   refNameMap: Map<string, true>,
-  propNameMap: Map<string, true>
+  propNameMap: Map<string, true>,
 ) => {
   return str
     .replace(/this\.\$(\w+)/g, (_, p1) => {
@@ -131,7 +131,7 @@ export const replaceThisContext = (
 }
 
 export const getImportStatement = (setupProps: ConvertedExpression[]) => {
-  // AutoImportしてるので不要
+  // these are unnecessary because they are already imported by AutoImport
   // const usedFunctions = [
   //   ...new Set(
   //     setupProps
@@ -157,7 +157,7 @@ export const getImportStatement = (setupProps: ConvertedExpression[]) => {
       setupProps
         .filter((el) => el.pkg && el.pkg !== 'ignore')
         .map(({ use }) => use)
-        .filter(nonNull)
+        .filter(nonNull),
     ),
   ]
   if (extraImports.length)
@@ -165,8 +165,8 @@ export const getImportStatement = (setupProps: ConvertedExpression[]) => {
       ...ts.createSourceFile(
         '',
         `import { ${extraImports.join(',')} } from 'pinia'`,
-        ts.ScriptTarget.Latest
-      ).statements
+        ts.ScriptTarget.Latest,
+      ).statements,
     )
 
   return results
@@ -175,15 +175,15 @@ export const getImportStatement = (setupProps: ConvertedExpression[]) => {
 export const getExportStatement = (
   setupProps: ConvertedExpression[],
   propNames: string[],
-  otherProps: ConvertedExpression[]
+  otherProps: ConvertedExpression[],
 ) => {
   const body = ts.factory.createBlock(getSetupStatements(setupProps))
 
   if (otherProps.length) {
     body.statements.push(
       ts.factory.createIdentifier(
-        '\n//TODO: 対応していないプロパティです。手動で書き換えてください。:\n'
-      )
+        '\n//TODO: 対応していないプロパティです。手動で書き換えてください。:\n',
+      ),
     )
     otherProps.forEach((prop) => {
       body.statements.push(ts.factory.createIdentifier(prop.expression))
@@ -221,14 +221,14 @@ export const getSetupStatements = (setupProps: ConvertedExpression[]) => {
   const emitterNameSet: Set<string> = new Set()
 
   setupProps.forEach(({ expression }) =>
-    findEmiters(expression, emitterNameSet)
+    findEmiters(expression, emitterNameSet),
   )
 
   if (emitterNameSet.size !== 0)
     setupProps.unshift({
       use: 'emitter',
       expression: `const emit = defineEmits(${JSON.stringify(
-        Array.from(emitterNameSet)
+        Array.from(emitterNameSet),
       )})`,
     })
 
@@ -263,7 +263,7 @@ export const getSetupStatements = (setupProps: ConvertedExpression[]) => {
 
     .filter(
       (value, index, self) =>
-        index === self.findIndex((t) => t.expression === value.expression)
+        index === self.findIndex((t) => t.expression === value.expression),
     )
     .reduce((pv: ConvertedExpression[], cv: ConvertedExpression) => {
       const previous = pv[pv.length - 1]
@@ -283,7 +283,7 @@ export const getSetupStatements = (setupProps: ConvertedExpression[]) => {
         return ts.createSourceFile(
           '',
           replaceThisContext(expression, refNameMap, propNameMap),
-          ts.ScriptTarget.Latest
+          ts.ScriptTarget.Latest,
         ).statements
       }
     })
@@ -297,7 +297,20 @@ export function throwErrorOnDestructuring(string: string) {
     throw new Error(
       `destructuring 'this' in ${name}, ` +
         bodyIncludesThis +
-        `could be a conflict. `
+        `could be a conflict. `,
     )
   }
+}
+
+export const objToString = (obj: any) => {
+  let str = '{ '
+  if (obj instanceof Object) {
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        str += `${key}: ${obj[key]}, `
+      }
+    }
+    str = str.slice(0, -2) + ' }'
+  }
+  return str
 }
