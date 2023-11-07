@@ -12,7 +12,6 @@ module.exports = {
         'eslint-config-airbnb-base/whitespace',
         'airbnb-base/legacy',
         'airbnb-base',
-        '@vue/eslint-config-typescript/recommended',
         'plugin:vue/vue3-recommended',
         'plugin:import/recommended',
         'prettier'

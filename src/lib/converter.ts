@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { parseComponent } from 'vue-template-compiler';
 import { getNodeByKind } from './helper';
-import { convertOptionsApi } from './converters/optionsApiConverter';
+import convertOptionsApi from './converters/optionsApiConverter';
 
 export const convertSrc = (input: string): string => {
     const parsed = parseComponent(input);

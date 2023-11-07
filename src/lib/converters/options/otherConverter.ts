@@ -3,7 +3,7 @@ import { ConvertedExpression } from '../../helper';
 
 function commentOutNode(node: ts.Node, sourceFile: ts.SourceFile): string {
     const text = node.getFullText(sourceFile);
-    const lines = text.split(/\r?\n/g).map((line) => `// ${  line.trim()}`);
+    const lines = text.split(/\r?\n/g).map((line) => `// ${line.trim()}`);
     return lines.join('\n');
 }
 

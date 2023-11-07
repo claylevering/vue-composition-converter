@@ -11,7 +11,8 @@ export const propReader = (node: ts.Node, sourceFile: ts.SourceFile): string[] =
                 return prop.name.getText(sourceFile);
             })
             .filter(nonNull);
-    } if (ts.isArrayLiteralExpression(node.initializer)) {
+    }
+    if (ts.isArrayLiteralExpression(node.initializer)) {
         return node.initializer.elements
             .map((el) => {
                 if (ts.isStringLiteral(el)) return el.text;

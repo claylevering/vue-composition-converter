@@ -1,8 +1,8 @@
 import ts from 'typescript';
 import { getExportStatement, getImportStatement } from '../helper';
-import { convertOptions } from './options/optionsConverter';
+import convertOptions from './options/optionsConverter';
 
-export const convertOptionsApi = (sourceFile: ts.SourceFile) => {
+export default (sourceFile: ts.SourceFile) => {
     const options = convertOptions(sourceFile);
     if (!options) {
         throw new Error('invalid options');

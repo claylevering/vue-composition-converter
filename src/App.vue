@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import TheConverter from './components/TheConverter.vue';
-import './index.css';
 </script>
 
 <template>

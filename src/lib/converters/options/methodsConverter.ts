@@ -25,7 +25,7 @@ export const getMethodExpression = (node: ts.Node, sourceFile: ts.SourceFile): C
         pArray.forEach((parameter) => {
             if (parameter === '') return;
             if (hasWord(parameter, body)) {
-                throw new Error(`Scope issue in ${name} , ${  parameter  }parameter conflicts with this.${parameter}. `);
+                throw new Error(`Scope issue in ${name} , ${parameter}parameter conflicts with this.${parameter}. `);
             }
         });
 
@@ -57,6 +57,7 @@ export const getMethodExpression = (node: ts.Node, sourceFile: ts.SourceFile): C
     return [];
 };
 
-export const methodsConverter = (node: ts.Node, sourceFile: ts.SourceFile): ConvertedExpression[] => getInitializerProps(node)
-    .map((prop) => getMethodExpression(prop, sourceFile))
-    .flat();
+export const methodsConverter = (node: ts.Node, sourceFile: ts.SourceFile): ConvertedExpression[] =>
+    getInitializerProps(node)
+        .map((prop) => getMethodExpression(prop, sourceFile))
+        .flat();

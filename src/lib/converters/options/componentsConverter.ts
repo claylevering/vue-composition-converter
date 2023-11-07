@@ -1,16 +1,16 @@
 import ts from 'typescript';
 import { ConvertedExpression, getInitializerProps, nonNull } from '../../helper';
 
-export const componentsConverter = (node: ts.Node, sourceFile: ts.SourceFile): ConvertedExpression[] => 
+export const componentsConverter = (node: ts.Node, sourceFile: ts.SourceFile): ConvertedExpression[] =>
     // extract only defineAsyncComponent
     getInitializerProps(node)
         .map((prop) => {
             if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
                 const name = prop.name.text;
-                const {initializer} = prop;
+                const { initializer } = prop;
 
                 if (ts.isCallExpression(initializer)) {
-                    const {expression} = initializer;
+                    const { expression } = initializer;
                     const expressionText = expression.getText(sourceFile);
 
                     if (expressionText === 'defineAsyncComponent') {
@@ -26,5 +26,4 @@ export const componentsConverter = (node: ts.Node, sourceFile: ts.SourceFile): C
             }
         })
         .flat()
-        .filter(nonNull)
-;
+        .filter(nonNull);
