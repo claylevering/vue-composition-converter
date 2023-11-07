@@ -1,0 +1,65 @@
+# =====================================
+# Common settings
+# =====================================
+
+# Auto detect text files and perform CRLF normalization
+* text=auto
+
+# Documents
+*.doc       diff=astextplain
+*.DOC       diff=astextplain
+*.docx      diff=astextplain
+*.DOCX      diff=astextplain
+*.dot       diff=astextplain
+*.DOT       diff=astextplain
+*.pdf       diff=astextplain
+*.PDF       diff=astextplain
+*.rtf       diff=astextplain
+*.RTF       diff=astextplain
+*.md        text eol=lf
+*.MD        text eol=lf
+*.js        text eol=lf
+*.JS        text eol=lf
+*.adoc      text eol=lf
+*.textile   text eol=lf
+*.mustache  text eol=lf
+*.csv       text eol=lf
+*.tab       text eol=lf
+*.tsv       text eol=lf
+*.sql       text eol=lf
+*.sh        text eol=lf
+*.conf      text eol=lf
+
+# Graphics
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.tif   binary
+*.tiff  binary
+*.ico   binary
+*.svg   binary
+*.eps   binary
+
+# =====================================
+# Team Foundation / Visual Studio
+# =====================================
+
+*.cs        diff=csharp
+*.sln       text eol=lf
+*.csproj    text eol=lf
+*.vbproj    text eol=lf
+*.vcxproj   text eol=lf
+*.vcproj    text eol=lf
+*.dbproj    text eol=lf
+*.fsproj    text eol=lf
+*.lsproj    text eol=lf
+*.wixproj   text eol=lf
+*.modelproj text eol=lf
+*.sqlproj   text eol=lf
+*.wmaproj   text eol=lf
+
+*.xproj     text eol=lf
+*.props     text eol=lf
+*.filters   text eol=lf
+*.vcxitems  text eol=lf
