@@ -13,18 +13,20 @@ In this case you need to fix your code before attempting to convert.
 
 ## convert options into `script setup`
 
-- data, computed, watch, methods, lifecycle, props -> setup()
-  - data -> ref()
-  - computed -> computed()
-  - watch -> watch()
-  - methods -> function
-  - lifecycle -> lifecycle hooks
-    - beforeCreate, created -> Immediate function
-  - props -> toRefs()
+-   data, computed, watch, methods, lifecycle, props -> setup()
+    -   data -> ref()
+    -   computed -> computed()
+    -   watch -> watch()
+    -   methods -> function
+    -   lifecycle -> lifecycle hooks
+        -   beforeCreate, created -> Immediate function
+    -   props -> toRefs()
 
 ## convert `this`
 
-- this.prop
-  - (toRefs, ref, computed) -> prop.value
-  - (other) -> prop
-- this.$globalProp -> ctx.root.$globalProp
+-   this.prop
+    -   (toRefs, ref, computed) -> prop.value
+    -   (other) -> prop
+-   this.$globalProp -> ctx.root.$globalProp
+
+Testing a link to [THE TOP](#convert-options-into-script-setup)

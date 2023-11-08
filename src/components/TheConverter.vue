@@ -64,7 +64,7 @@ onUpdated(() => {
 </script>
 
 <template>
-    <div class="h-16">
+    <div class="h-48">
         <div v-if="hasError" class="hasError p-4 m-6">
             <h2>Error:</h2>
             <p>Check the console for details</p>
